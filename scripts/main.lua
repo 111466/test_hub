@@ -28,15 +28,18 @@ local mapLayers = {}
 -- 读取与解析 JSON
 -- ============================================================================
 local function loadMapData()
-    -- 使用 io.open 读取 json 文件。假设当前目录是 test_hub
-    local path = fileSystem:GetCurrentDir() .. "docs/output.json"
-    local f = io.open(path, "r")
+    -- 使用 Urho3D 的 ResourceCache 读取 json 文件，替代 io.open
+    local path = "docs/output.json"
+    local f = cache:GetFile(path)
     if not f then
-        print("ERROR: Failed to open " .. path)
+        print("ERROR: Failed to open " .. path .. " from ResourceCache")
         return
     end
-    local content = f:read("*a")
-    f:close()
+    
+    local content = ""
+    while not f.eof do
+        content = content .. f:ReadLine() .. "\n"
+    end
 
     local mapData = json.decode(content)
     if not mapData then
