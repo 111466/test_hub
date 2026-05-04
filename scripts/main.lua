@@ -301,9 +301,24 @@ function HandleNanoVGRender(eventType, eventData)
     for _, layer in ipairs(mapLayers) do
         if not layer.visible then goto continue_layer end
 
+        -- 修正：将稀疏数组构建为二维网格，保证严格的 Z-Order 渲染顺序
+        local grid = {}
+        for y = 1, MAP_H do
+            grid[y] = {}
+        end
         for _, tile in ipairs(layer.tiles) do
-            local def = tileDefs[tile.id]
-            if not def then goto continue_tile end
+            if tile.y >= 1 and tile.y <= MAP_H and tile.x >= 1 and tile.x <= MAP_W then
+                grid[tile.y][tile.x] = tile
+            end
+        end
+
+        for y = 1, MAP_H do
+            for x = 1, MAP_W do
+                local tile = grid[y][x]
+                if not tile then goto continue_tile end
+
+                local def = tileDefs[tile.id]
+                if not def then goto continue_tile end
 
             local imgHandle = imgHandles[def.path]
             local imgSize = imgSizes[def.path]
@@ -346,6 +361,7 @@ function HandleNanoVGRender(eventType, eventData)
             end
 
             ::continue_tile::
+            end
         end
 
         ::continue_layer::
