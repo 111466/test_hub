@@ -29,8 +29,15 @@ local mapLayers = {}
 -- ============================================================================
 local function loadMapData()
     -- 使用 Urho3D 的 ResourceCache 读取 json 文件，替代 io.open
-    local path = "docs/output.json"
+    local path = "output.json"
     local f = cache:GetFile(path)
+    if not f then
+        -- 尝试从相对于 assets/ 或者其他可能挂载的目录读取
+        f = cache:GetFile("docs/output.json")
+    end
+    if not f then
+        f = cache:GetFile("../docs/output.json")
+    end
     if not f then
         print("ERROR: Failed to open " .. path .. " from ResourceCache")
         return
