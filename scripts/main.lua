@@ -333,10 +333,10 @@ function HandleNanoVGRender(eventType, eventData)
             local dy = offsetY + (tile.y - 1) * tileSize
 
             if def.renderMode == "vertical" then
-                -- 竖直渲染模式（如树）：保持宽高比，底部对齐到格子底边
-                local aspect = frame.w / frame.h
-                local drawH = tileSize * 2.5   -- 树比格子高
-                local drawW = drawH * aspect
+                -- 竖直渲染模式（如树）：基于基准网格(64)和原图比例进行缩放，并应用 JSON 中的 scale
+                local ratio = tileSize / 64
+                local drawW = frame.w * ratio * def.scale
+                local drawH = frame.h * ratio * def.scale
                 local cx = dx + tileSize / 2   -- 水平居中
                 local drawX = cx - drawW / 2
                 local drawY = dy + tileSize - drawH  -- 底部对齐
@@ -346,11 +346,11 @@ function HandleNanoVGRender(eventType, eventData)
                     drawX, drawY, drawW, drawH,
                     layer.opacity)
             else
-                -- 平铺渲染模式
-                local scale = def.scale
-                local drawW = tileSize * scale
-                local drawH = tileSize * scale
-                -- 居中对齐（scale > 1 时会溢出格子边界）
+                -- 平铺渲染模式：保持原图比例并应用 JSON 中的 scale，避免非正方形贴图变形
+                local ratio = tileSize / 64
+                local drawW = frame.w * ratio * def.scale
+                local drawH = frame.h * ratio * def.scale
+                -- 居中对齐
                 local drawX = dx + (tileSize - drawW) / 2
                 local drawY = dy + (tileSize - drawH) / 2
 
